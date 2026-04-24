@@ -1,0 +1,221 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class Vehicle {
+protected:
+    string brand;
+    double price;
+public:
+    Vehicle() {
+        brand = "Generic";
+        price = 1000.0;
+    }
+    Vehicle(string b, double p = 2000.0) {
+        brand = b;
+        price = p;
+    }
+    virtual ~Vehicle() {}
+    virtual void printInfo() const = 0;
+
+    double calculateVat() const {
+        return price * 0.20;
+    }
+    double finalPrice() const {
+        return price + (price * 0.20);
+    }
+};
+
+class LandVehicle : virtual public Vehicle {
+protected:
+    int wheels;
+    double fuel;
+public:
+    LandVehicle() : Vehicle() {
+        wheels = 4;
+        fuel = 50.0;
+    }
+    LandVehicle(string b, double p, int w = 4, double f = 40.0) : Vehicle(b, p) {
+        wheels = w;
+        fuel = f;
+    }
+    void printInfo() const override {
+        cout << "Brand: " << brand << " | Price: " << price << " | Wheels: " << wheels;
+    }
+    double range() const {
+        return fuel * 10.5;
+    }
+    int tireCost() const {
+        return wheels * 150;
+    }
+};
+
+class AirVehicle : public Vehicle {
+protected:
+    double altitude;
+    int engines;
+public:
+    AirVehicle() : Vehicle() {
+        altitude = 1000.0;
+        engines = 1;
+    }
+    AirVehicle(string b, double p, double a = 10000.0, int e = 2) : Vehicle(b, p) {
+        altitude = a;
+        engines = e;
+    }
+    void printInfo() const override {
+        cout << "Brand: " << brand << " | Price: " << price << " | Alt: " << altitude;
+    }
+    double kmAltitude() const {
+        return altitude / 1000.0;
+    }
+    int engineService() const {
+        return engines * 5000;
+    }
+};
+
+class Car : virtual public LandVehicle {
+protected:
+    int seats;
+    double engineVol;
+public:
+    Car() : LandVehicle() {
+        seats = 5;
+        engineVol = 1.6;
+    }
+    Car(string b, double p, int s = 5, double ev = 2.0) : Vehicle(b, p), LandVehicle(b, p) {
+        seats = s;
+        engineVol = ev;
+    }
+    void printInfo() const override {
+        LandVehicle::printInfo();
+        cout << " | Seats: " << seats << " | Eng: " << engineVol;
+    }
+    double roadTax() const {
+        return engineVol * 100.0;
+    }
+    int washPrice() const {
+        return seats * 10;
+    }
+};
+
+class Truck : virtual public LandVehicle {
+protected:
+    double capacity;
+    int axles;
+public:
+    Truck() : LandVehicle() {
+        capacity = 5.0;
+        axles = 2;
+    }
+    Truck(string b, double p, double cap = 15.0, int ax = 3) : Vehicle(b, p), LandVehicle(b, p) {
+        capacity = cap;
+        axles = ax;
+    }
+    void printInfo() const override {
+        LandVehicle::printInfo();
+        cout << " | Cap: " << capacity << "t | Axles: " << axles;
+    }
+    double bridgeFee() const {
+        return axles * 20.0;
+    }
+    double totalWeight(double load) const {
+        return capacity + load;
+    }
+};
+
+class Plane : public AirVehicle {
+private:
+    double wingspan;
+    int passengers;
+public:
+    Plane() : AirVehicle() {
+        wingspan = 30.0;
+        passengers = 100;
+    }
+    Plane(string b, double p, double w = 65.5, int pass = 300) : AirVehicle(b, p) {
+        wingspan = w;
+        passengers = pass;
+    }
+    void printInfo() const override {
+        AirVehicle::printInfo();
+        cout << " | Wing: " << wingspan << "m | Pass: " << passengers;
+    }
+    double liftForce() const {
+        return wingspan * 10.0;
+    }
+    double ticketPrice() const {
+        return (price / 1000.0) / passengers;
+    }
+};
+
+class ElectricCar : public Car, public Truck {
+private:
+    double battery;
+    double charge;
+public:
+    ElectricCar() : Car(), Truck() {
+        battery = 75.0;
+        charge = 100.0;
+    }
+    ElectricCar(string b, double p, double batt = 100.0, double ch = 50.0)
+        : Vehicle(b, p), LandVehicle(b, p), Car(b, p), Truck(b, p) {
+        battery = batt;
+        charge = ch;
+    }
+    void printInfo() const override {
+        Car::printInfo();
+        cout << " | Batt: " << battery << "kWh | Charge: " << charge << "%";
+    }
+    double remainingRange() const {
+        return (battery * (charge / 100.0)) * 6.0;
+    }
+    double chargingCost(double pricePerKwh) const {
+        return (battery * (1 - charge / 100.0)) * pricePerKwh;
+    }
+};
+
+int main() {
+    Vehicle* elements[] = {
+        new LandVehicle("Generic Land", 5000, 4, 20),
+        new AirVehicle("Generic Air", 50000, 2000, 1),
+        new Car("Toyota", 30000, 5, 1.8),
+        new Truck("MAN", 90000, 15, 2),
+        new Plane("Cessna", 500000, 4000, 1),
+        new ElectricCar("Tesla Truck", 100000, 100, 90)
+    };
+
+    for (auto e : elements) {
+        if (e == nullptr) continue;
+
+        e->printInfo();
+        cout << endl;
+
+        if (ElectricCar* ec = dynamic_cast<ElectricCar*>(e)) {
+            cout << "> Remaining Range: " << ec->remainingRange() << " km" << endl;
+        }
+        else if (Plane* p = dynamic_cast<Plane*>(e)) {
+            cout << "> Ticket Price: " << p->ticketPrice() << " lv" << endl;
+        }
+        else if (Truck* t = dynamic_cast<Truck*>(e)) {
+            cout << "> Bridge Fee: " << t->bridgeFee() << " lv" << endl;
+        }
+        else if (Car* c = dynamic_cast<Car*>(e)) {
+            cout << "> Wash Price: " << c->washPrice() << " lv" << endl;
+        }
+        else if (AirVehicle* av = dynamic_cast<AirVehicle*>(e)) {
+            cout << "> Altitude in KM: " << av->kmAltitude() << endl;
+        }
+        else if (LandVehicle* lv = dynamic_cast<LandVehicle*>(e)) {
+            cout << "> Range: " << lv->range() << " km" << endl;
+        }
+
+        
+        cout << "VAT: " << e->calculateVat() << " lv" << endl;
+        cout << "------------------------------------" << endl;
+    }
+
+    for (auto e : elements) delete e;
+    return 0;
+}
