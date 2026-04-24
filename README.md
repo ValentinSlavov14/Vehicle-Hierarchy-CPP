@@ -1,1 +1,4 @@
-# Vehicle-Hierarchy-CPP
+# Проект: Йерархия на превозни средства
+
+Ето моята диаграма на класовете:
+![Class Diagram](diagram.png)
