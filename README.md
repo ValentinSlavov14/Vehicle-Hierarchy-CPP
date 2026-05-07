@@ -2,5 +2,5 @@
 
 Диаграма на класовете:
 
-![Class Diagram](diagram.jpg)
+![Class Diagram](diagram1.png)
 
